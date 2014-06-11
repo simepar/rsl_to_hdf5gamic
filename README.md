@@ -40,6 +40,6 @@ to write an HDF5 file
 
 When compiling your application:
 
-- If you have the dynamic library, link to it with the flag *-lrsl_to_hdf5gamic*. You must also link RSL and HDF5 with *-lrsl -lhdf5*
+- If you have the dynamic library, link with the flag *-lrsl_to_hdf5gamic*. You must also link RSL and HDF5 with *-lrsl -lhdf5*
 
 - If want to use the pure code add the file *rsl_to_hdf5gamic.c* in your compilation line and link to RSL and HDF5  with  *-lrsl -lhdf5*
