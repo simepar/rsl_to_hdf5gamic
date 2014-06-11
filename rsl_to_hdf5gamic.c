@@ -49,7 +49,7 @@ typedef struct {
 
 
 /**************** PROTOTYPE ****************/
-void radar_to_hdf5gamic(Radar* radar, char *outfile);// This is the only function intended to be call externally, it receives a RSL/TRMM radar extruture (trmm-fc.gsfc.nasa.gov/trmm_gv/software/rsl/) and write a HDF5 file in the Gamic Convention named outfile. In respect to the convention this function expect all volumes of the radar extruture to have the same number of sweeps. Furthermore although compatible with RSL V1.44, only volumes with index smaller than 20 are converted, this is dow to the fact that we are not sure how to name the other volumes in the HDF5 file. To extend this functionaly update the variable rsl_to_name_hdf5
+void radar_to_hdf5gamic(Radar* radar, char *outfile);// This is the only function intended to be call externally, it receives a RSL/TRMM radar structure (trmm-fc.gsfc.nasa.gov/trmm_gv/software/rsl/) and write a HDF5 file in the Gamic Convention named outfile. In respect to the convention this function expect all volumes of the radar strucure to have the same number of sweeps. Furthermore although compatible with RSL V1.44, only volumes with index smaller than 20 are converted, this is dow to the fact that we are not sure how to name the other volumes in the HDF5 file. To extend this functionaly update the variable rsl_to_name_hdf5
 
 //This functions automate the tedious process of writing to a HDF5 file
 void write_attr_text(hid_t loc_id,char *name,char * value);//write atribute text to HDF5
