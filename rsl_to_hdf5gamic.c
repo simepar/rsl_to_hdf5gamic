@@ -91,12 +91,12 @@ void radar_to_hdf5gamic(Radar* radar, char *outfile){
 	nvolume=j;//number of volumes to be writen
 	nsweeps=radar->v[moments[0]]->h.nsweeps;//number of scans
 
-		
+
 	//Overwrite file if already exist
 	file_id = H5Fcreate(outfile, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
 	if(file_id<0){ printf("Falling Creating a HDF5 file\n"); exit(-1);}
 	if(radar_verbose_flag) printf("Start writing HDF5\n");
-	
+
 	//creat groups
 	what_id=H5Gcreate2(file_id,"/what", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
 	//create, white and close atributes of /what
@@ -108,21 +108,21 @@ void radar_to_hdf5gamic(Radar* radar, char *outfile){
 		write_attr_text(what_id,"date",string);
 		write_attr_uint(what_id,"sets",nsweeps);
 		H5Gclose(what_id);
-		
+
 	how_id=H5Gcreate2(file_id,"/how", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
 	//create, white and close atributes of /how
 		write_attr_double(how_id,"elevation_beam",radar->v[moments[0]]->sweep[0]->h.vert_half_bw);
 		write_attr_double(how_id,"azimuth_beam",radar->v[moments[0]]->sweep[0]->h.horz_half_bw);
 		write_attr_text(how_id,"site_name",radar->h.radar_name);
 		H5Gclose(how_id);
-		
+
 	where_id=H5Gcreate2(file_id,"/where", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
 	//create, white and close atributes of /where
 		write_attr_double(where_id,"lat",radar->h.latd+(radar->h.latm/60)+(radar->h.lats/3600));
 		write_attr_double(where_id,"lon",radar->h.lond+(radar->h.lonm/60)+(radar->h.lons/3600));
 		write_attr_double(where_id,"height",radar->h.height);
 		H5Gclose(where_id);
-	
+
 	for(i=0;i<nsweeps;i++){
 		if(radar_verbose_flag) printf("Writing /scan%i...\n",i);
 		sprintf(scan,"/scan%d",i); 
@@ -133,7 +133,7 @@ void radar_to_hdf5gamic(Radar* radar, char *outfile){
 			write_attr_text(group_id,"scan_type","PPI");
 			write_attr_uint(group_id,"descriptor_count",nvolume);
 			H5Gclose(group_id);
-			
+
 		group_id=H5Gcreate2(scan_id,"how", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
 		//create, white and close atributes of /scanXX/how
 			sprintf(string, "%04i-%02i-%02iT%02i:%02i:%02iZ", radar->v[moments[0]]->sweep[i]->ray[0]->h.year,
@@ -145,7 +145,7 @@ void radar_to_hdf5gamic(Radar* radar, char *outfile){
 			write_attr_double(group_id,"range_start",radar->v[moments[0]]->sweep[i]->ray[0]->h.range_bin1);
 			write_attr_double(group_id,"scan_speed",radar->v[moments[0]]->sweep[i]->ray[0]->h.azim_rate);
 			write_attr_double(group_id,"range",radar->v[moments[0]]->sweep[i]->ray[0]->h.range_bin1+radar->v[moments[0]]->sweep[i]->ray[0]->h.gate_size*radar->v[moments[0]]->sweep[i]->ray[0]->h.nbins);
-			
+
 			write_attr_double(group_id,"range_step",radar->v[moments[0]]->sweep[i]->ray[0]->h.gate_size);
 			write_attr_uint(group_id,"range_samples",-1);
 			write_attr_uint(group_id,"PRF",radar->v[moments[0]]->sweep[i]->ray[0]->h.prf);
@@ -161,7 +161,7 @@ void radar_to_hdf5gamic(Radar* radar, char *outfile){
 			write_attr_double(group_id,"azi_stop",radar->v[moments[0]]->sweep[i]->ray[radar->v[moments[0]]->sweep[i]->h.nrays-1]->h.azimuth);
 			write_attr_double(group_id,"elevation",radar->v[moments[0]]->sweep[i]->ray[0]->h.elev);
 			H5Gclose(group_id);
-			
+
 			//Now Ray_Header
 			//create compond type					
 			hid_t  ray_header_mem,ray_header_file;
@@ -187,7 +187,7 @@ void radar_to_hdf5gamic(Radar* radar, char *outfile){
 				   	status = H5Dclose(attr_id);
 					status = H5Sclose(dataspace_id); 
 					free(rays_header);
-			
+
 		for(j=0;j<nvolume;j++){
 			if(radar_verbose_flag)printf("        /scan%i/moment_%i:  %s\n",i,j,rsl_to_name_hdf5[moments[j]]);
 			sprintf(moment, "moment_%d", j);
@@ -210,7 +210,7 @@ void radar_to_hdf5gamic(Radar* radar, char *outfile){
 			status = H5Dclose(dataset_id);
 			status = H5Sclose(dataspace_id); 
 			free(buffer);
-			
+
 		}
 		status = H5Gclose(scan_id);
 	}
@@ -218,15 +218,18 @@ void radar_to_hdf5gamic(Radar* radar, char *outfile){
 	status = H5Fclose(file_id);
 	if(radar_verbose_flag)printf("OK\n");
 }	
-	
-	
+
+
 /********* ATTRIBUTE WRITING FUNCTIONS **********/
 void write_attr_text(hid_t loc_id,char *name,char * value){//write atribute text
+	const hsize_t dim=1;
 	herr_t status; 
 	const hsize_t len=strlen(value); 
-	hid_t dataspace_id = H5Screate_simple(1, &len, NULL); 
-	hid_t attr_id=H5Acreate2(loc_id,name,H5T_C_S1,dataspace_id,H5P_DEFAULT, H5P_DEFAULT); 
-	status = H5Awrite(attr_id,H5T_C_S1, value);
+	hid_t dataspace_id = H5Screate_simple(1, &dim, NULL); 
+	hid_t atype = H5Tcopy(H5T_C_S1);
+	status = H5Tset_size(atype, len);
+	hid_t attr_id=H5Acreate2(loc_id,name,atype,dataspace_id,H5P_DEFAULT, H5P_DEFAULT); 
+	status = H5Awrite(attr_id,atype, value);
    	status = H5Aclose(attr_id);
 	status = H5Sclose(dataspace_id); 
 }
@@ -298,7 +301,7 @@ unsigned char *make_buffer(int moment,Sweep * sweep,double max, double min){
 	}
 	//printf("max %f, min %f\n",max,min);
 	return buffer;
-			
+
 }
 /********* ACCESSORY FUNCTIONS **********/
 
@@ -316,7 +319,7 @@ unsigned long long int unix_time(Ray_header header){
 	struct tm tmTime;
 	double time2;
 	unsigned long long int time3;
-	
+
 	tmTime.tm_sec=0;	
 	tmTime.tm_min=header.minute	;
 	tmTime.tm_hour=header.hour	;
@@ -326,7 +329,7 @@ unsigned long long int unix_time(Ray_header header){
 	tmTime.tm_wday=-1	;
 	tmTime.tm_yday=-1;
 	tmTime.tm_isdst=-1;
-	
+
 	time=mktime(&tmTime);
 	time=time-timezone;
 	time2=(((double)time)+header.sec);
@@ -369,4 +372,3 @@ double get_min(Sweep *sweep){
 	ret=min;
 	return min;
 }
-
