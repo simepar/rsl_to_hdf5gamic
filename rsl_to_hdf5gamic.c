@@ -147,15 +147,15 @@ void radar_to_hdf5gamic(Radar* radar, char *outfile){
 			write_attr_double(group_id,"range",radar->v[moments[0]]->sweep[i]->ray[0]->h.range_bin1+radar->v[moments[0]]->sweep[i]->ray[0]->h.gate_size*radar->v[moments[0]]->sweep[i]->ray[0]->h.nbins);
 
 			write_attr_double(group_id,"range_step",radar->v[moments[0]]->sweep[i]->ray[0]->h.gate_size);
-			write_attr_uint(group_id,"range_samples",-1);
+			write_attr_uint(group_id,"range_samples",1);
 			write_attr_uint(group_id,"PRF",radar->v[moments[0]]->sweep[i]->ray[0]->h.prf);
 			write_attr_uint(group_id,"angle_sync",1);
 			write_attr_uint(group_id,"time_samples",-1);
 			if(radar->v[moments[0]]->sweep[i]->h.nrays>1);
 			write_attr_double(group_id,"angle_step",radar->v[moments[0]]->sweep[i]->ray[1]->h.azimuth-radar->v[moments[0]]->sweep[i]->ray[0]->h.azimuth);
-			write_attr_uint(group_id,"unfolding ",get_unfolding(radar->v[moments[0]]->sweep[i]->ray[0]));
+			write_attr_uint(group_id,"unfolding",get_unfolding(radar->v[moments[0]]->sweep[i]->ray[0]));
 			write_attr_uint(group_id,"filter",-1);
-			write_attr_double(group_id,"radar_wave_length ",radar->v[moments[0]]->sweep[i]->ray[0]->h.wavelength);
+			write_attr_double(group_id,"radar_wave_length",radar->v[moments[0]]->sweep[i]->ray[0]->h.wavelength);
 			write_attr_uint(group_id,"ray_count",radar->v[moments[0]]->sweep[i]->h.nrays);
 			write_attr_double(group_id,"azi_start",radar->v[moments[0]]->sweep[i]->ray[0]->h.azimuth);
 			write_attr_double(group_id,"azi_stop",radar->v[moments[0]]->sweep[i]->ray[radar->v[moments[0]]->sweep[i]->h.nrays-1]->h.azimuth);
@@ -222,17 +222,23 @@ void radar_to_hdf5gamic(Radar* radar, char *outfile){
 
 /********* ATTRIBUTE WRITING FUNCTIONS **********/
 void write_attr_text(hid_t loc_id,char *name,char * value){//write atribute text
-	const hsize_t dim=1;
-	herr_t status; 
-	const hsize_t len=strlen(value); 
-	hid_t dataspace_id = H5Screate_simple(1, &dim, NULL); 
-	hid_t atype = H5Tcopy(H5T_C_S1);
-	status = H5Tset_size(atype, len);
-	hid_t attr_id=H5Acreate2(loc_id,name,atype,dataspace_id,H5P_DEFAULT, H5P_DEFAULT); 
-	status = H5Awrite(attr_id,atype, value);
-   	status = H5Aclose(attr_id);
-	status = H5Sclose(dataspace_id); 
+	herr_t status;
+	hid_t attr_id;
+	const hsize_t dims[1] = {1};
+	hid_t memtype;
+	hid_t dataspace_id;
+
+	dataspace_id = H5Screate_simple(1, dims, NULL);
+
+	memtype = H5Tcopy(H5T_C_S1);   
+	H5Tset_size(memtype, H5T_VARIABLE);
+
+	attr_id = H5Acreate(loc_id, name, memtype, dataspace_id, H5P_DEFAULT, H5P_DEFAULT);
+	status = H5Awrite(attr_id, memtype, &value);
+	status = H5Aclose(attr_id);
+	status = H5Sclose(dataspace_id);
 }
+
 void write_attr_float(hid_t loc_id,char *name,float value){//write atribute float
 	herr_t status;
 	const hsize_t len=1;
