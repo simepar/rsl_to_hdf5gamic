@@ -228,7 +228,7 @@ void write_attr_text(hid_t loc_id,char *name,char * value){//write atribute text
 	hid_t memtype;
 	hid_t dataspace_id;
 
-	dataspace_id = H5Screate_simple(1, dims, NULL);
+	dataspace_id =  H5Screate(H5S_SCALAR);
 
 	memtype = H5Tcopy(H5T_C_S1);   
 	H5Tset_size(memtype, H5T_VARIABLE);
@@ -242,7 +242,7 @@ void write_attr_text(hid_t loc_id,char *name,char * value){//write atribute text
 void write_attr_float(hid_t loc_id,char *name,float value){//write atribute float
 	herr_t status;
 	const hsize_t len=1;
-	hid_t dataspace_id = H5Screate_simple(1, &len, NULL);
+	hid_t dataspace_id =  H5Screate(H5S_SCALAR);
 	hid_t attr_id=H5Acreate2(loc_id,name,H5T_IEEE_F32LE,dataspace_id,H5P_DEFAULT, H5P_DEFAULT);
 	status = H5Awrite(attr_id,H5T_NATIVE_FLOAT, &value);
    	status = H5Aclose(attr_id);
@@ -251,7 +251,7 @@ void write_attr_float(hid_t loc_id,char *name,float value){//write atribute floa
 void write_attr_uint(hid_t loc_id,char *name,int value){//write atribute unsignet int
 	herr_t status; 
 	const hsize_t len=1;
-	hid_t dataspace_id = H5Screate_simple(1, &len, NULL);
+	hid_t dataspace_id =  H5Screate(H5S_SCALAR);
 	hid_t attr_id=H5Acreate2(loc_id,name,H5T_STD_U32LE,dataspace_id,H5P_DEFAULT, H5P_DEFAULT);
 	status = H5Awrite(attr_id,H5T_NATIVE_UINT, &value);
    	status = H5Aclose(attr_id);
@@ -260,7 +260,7 @@ void write_attr_uint(hid_t loc_id,char *name,int value){//write atribute unsigne
 void write_attr_double(hid_t loc_id,char *name,double value){//write atribute double
 	herr_t status; 
 	const hsize_t len=1;
-	hid_t dataspace_id = H5Screate_simple(1, &len, NULL);
+	hid_t dataspace_id =  H5Screate(H5S_SCALAR);
 	hid_t attr_id=H5Acreate2(loc_id,name,H5T_IEEE_F64LE,dataspace_id,H5P_DEFAULT, H5P_DEFAULT);
 	status = H5Awrite(attr_id,H5T_NATIVE_DOUBLE, &value);
    	status = H5Aclose(attr_id);
